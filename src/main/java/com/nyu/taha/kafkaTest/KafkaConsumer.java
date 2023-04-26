@@ -16,6 +16,5 @@ public class KafkaConsumer {
     )
     public void consume(String event){
         LOGGER.info(String.format("Consuming => %s", event.toString()));
-
     }
 }
