@@ -16,12 +16,15 @@ object Main extends App with SparkSessionWrapper {
     .selectExpr("timestamp", "CAST(value AS STRING)")
     .select("value", "timestamp").as[Flat]
     .map(flat => Event(WeatherData.unsafeFromFlat(flat.value), flat.timestamp))
+
+  val windowedDfStreaming = dfStreaming
     .groupBy(window($"timestamp", "1 minute", "1 minute"))
     .agg(avg("weatherData.current.temp_c").as("avg_temp_c"), avg("weatherData.current.feelslike_c").as("avg_feelslike_c"))
 
   dfStreaming.printSchema()
+  windowedDfStreaming.printSchema()
 
-  dfStreaming
+  windowedDfStreaming
     .writeStream
     .outputMode("update")
     .format("console")
