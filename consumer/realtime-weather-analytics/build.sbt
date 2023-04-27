@@ -2,13 +2,22 @@ name := "realtime-weather-analytics"
 
 version := "0.0.1"
 
-scalaVersion := "2.12.12"
+scalaVersion := "2.12.17"
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.1.1" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.4.0"
+libraryDependencies += "org.apache.spark" %% "spark-sql-kafka-0-10" % "3.4.0"
+
+val circeVersion = "0.14.5"
+libraryDependencies += "io.circe" %% "circe-core" % "0.14.5"
+libraryDependencies += "io.circe" %% "circe-core" % circeVersion
+libraryDependencies += "io.circe" %% "circe-parser" % circeVersion
+libraryDependencies += "io.circe" %% "circe-generic" % circeVersion
+libraryDependencies += "io.circe" %% "circe-literal" % circeVersion
 
 libraryDependencies += "com.github.mrpowers" %% "spark-daria" % "0.38.2"
 libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % "test"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+
 
 // test suite settings
 fork in Test := true
