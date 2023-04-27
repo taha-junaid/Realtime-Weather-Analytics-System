@@ -15,11 +15,11 @@ object WeatherData {
   implicit val encoder: Encoder[WeatherData] = deriveEncoder[WeatherData]
   implicit val decoder: Decoder[WeatherData] = deriveDecoder[WeatherData]
 
-  def unsafeFromFlat(flat: Flat): WeatherData = {
+  def unsafeFromFlat(flatString: String): WeatherData = {
     // flat.value is double-escaped json
     // parse it twice to actually get valid json
     val maybeWeatherData = for {
-      json <- parse(flat.value)
+      json <- parse(flatString)
       first <- json.as[String]
       second <- parse(first)
       weatherData <- second.as[WeatherData]

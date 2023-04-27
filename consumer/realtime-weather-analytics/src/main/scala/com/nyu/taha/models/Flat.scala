@@ -1,3 +1,5 @@
 package com.nyu.taha.models
 
-case class Flat(value: String)
+import java.sql.Timestamp
+
+case class Flat(value: String, timestamp: Timestamp)
