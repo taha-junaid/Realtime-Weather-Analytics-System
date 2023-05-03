@@ -2,6 +2,7 @@ package com.nyu.taha
 
 import com.nyu.taha.models.{Event, Flat, Location, WeatherData}
 import org.apache.spark.sql.functions.{avg, window}
+import org.apache.spark.sql.streaming.OutputMode
 
 
 object Main extends App with SparkSessionWrapper {
@@ -18,17 +19,26 @@ object Main extends App with SparkSessionWrapper {
     .map(flat => Event(WeatherData.unsafeFromFlat(flat.value), flat.timestamp))
 
   val windowedDfStreaming = dfStreaming
-    .groupBy(window($"timestamp", "1 minute", "1 minute"))
+    .withWatermark("timestamp", "5 minutes")
+    .groupBy(window($"timestamp", "5 minute", "5 minute"))
     .agg(avg("weatherData.current.temp_c").as("avg_temp_c"), avg("weatherData.current.feelslike_c").as("avg_feelslike_c"))
 
   dfStreaming.printSchema()
   windowedDfStreaming.printSchema()
 
+  // Note - the write configuration is extremely important for
+  // time-series data. see https://www.mongodb.com/docs/spark-connector/current/configuration/write/
   windowedDfStreaming
     .writeStream
-    .outputMode("update")
-    .format("console")
-    .option("truncate", "false")
+    .outputMode("complete")
+    .format("mongodb")
+    .option("checkpointLocation", "/tmp/checkpointDir")
+    .option("forceDeleteTempCheckpointLocation", "true")
+    .option("upsertDocument", "false")
+    .option("spark.mongodb.connection.uri", "<YOUR MONGO URI HERE>")
+    .option("spark.mongodb.database", "mydb")
+    .option("spark.mongodb.collection", "weather")
+    .outputMode("append")
     .start()
     .awaitTermination()
 
