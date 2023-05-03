@@ -2,10 +2,11 @@ name := "realtime-weather-analytics"
 
 version := "0.0.1"
 
-scalaVersion := "2.12.17"
+scalaVersion := "2.12.13"
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.4.0"
 libraryDependencies += "org.apache.spark" %% "spark-sql-kafka-0-10" % "3.4.0"
+libraryDependencies += "org.mongodb.spark" %% "mongo-spark-connector" % "10.1.1"
 
 val circeVersion = "0.14.5"
 libraryDependencies += "io.circe" %% "circe-core" % "0.14.5"
