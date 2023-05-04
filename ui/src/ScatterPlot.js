@@ -1,24 +1,48 @@
 import React from "react"
-import { scaleLinear, max, axisLeft, axisBottom, select } from "d3"
+import { scaleLinear, max, min, axisLeft, axisBottom, select } from "d3"
 
 export default class ScatterPlot extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            data: null,
+        };
+    }
+
+    async componentWillMount() {
+        try {
+            const response = await fetch('http://localhost:8080/weather');
+            // console.log(response);
+            const data = await response.json();
+            // console.log(data);
+            this.setState({ data });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     render() {
         const margin = { top: 20, right: 15, bottom: 60, left: 60 }
         const width = 800 - margin.left - margin.right
         const height = 600 - margin.top - margin.bottom
-        const data = this.props.data
+        const data = this.state.data;
+        console.log(data);
+        if (data == null) {
+            return;
+        }
 
         const x = scaleLinear()
             .domain([
-                0,
-                max(data, (d) => d[0])
+                min(data, (d) => new Date(d.window.end)),
+                max(data, (d) => new Date(d.window.end))
             ])
             .range([0, width])
 
         const y = scaleLinear()
             .domain([
-                0,
-                max(data, (d) => d[1])
+                min(data, (d) => d.avg_temp_c) - 1,
+                max(data, (d) => d.avg_temp_c) + 1
             ])
             .range([height, 0])
 
@@ -57,10 +81,10 @@ export default class ScatterPlot extends React.Component {
 
 class RenderCircles extends React.Component {
     render() {
-        let renderCircles = this.props.data.map((coords, i) => (
+        let renderCircles = this.props.data.map((point, i) => (
             <circle
-                cx={this.props.scale.x(coords[0])}
-                cy={this.props.scale.y(coords[1])}
+                cx={this.props.scale.x(new Date(point.window.end))}
+                cy={this.props.scale.y(point.avg_temp_c)}
                 r="8"
                 style={{ fill: "rgba(25, 158, 199, .9)" }}
                 key={i}
@@ -73,10 +97,10 @@ class RenderCircles extends React.Component {
 class TrendLine extends React.Component {
     render() {
         let x_coords = this.props.data.map(n => {
-            return n[0]
+            return new Date(n.window.end);
         })
         let y_coords = this.props.data.map(n => {
-            return n[1]
+            return n.avg_temp_c;
         })
         const trendline = linearRegression(y_coords, x_coords)
 
