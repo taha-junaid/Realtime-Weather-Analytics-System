@@ -21,7 +21,7 @@ function connect() {
 
 function getLatestWeather() {
   const collection = client.db('mydb').collection('weather');
-  const date = new Date().setHours(new Date().getHours() - 1);
+  const date = new Date().setHours(new Date().getHours() - 2);
   
   return collection.find({
     'window.end': { $gte: new Date(date) }

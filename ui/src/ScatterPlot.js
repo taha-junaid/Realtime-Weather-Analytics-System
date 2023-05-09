@@ -13,9 +13,7 @@ export default class ScatterPlot extends React.Component {
     async componentWillMount() {
         try {
             const response = await fetch('http://localhost:8080/weather');
-            console.log(response);
             const data = await response.json();
-            console.log(data);
             this.setState({ data });
         } catch (err) {
             console.error(err);
@@ -24,10 +22,9 @@ export default class ScatterPlot extends React.Component {
 
     render() {
         const margin = { top: 20, right: 15, bottom: 60, left: 60 }
-        const width = 800 - margin.left - margin.right
-        const height = 600 - margin.top - margin.bottom
+        const width = 1500 - margin.left - margin.right
+        const height = 850 - margin.top - margin.bottom
         const data = this.state.data;
-        console.log(data);
         if (data == null) {
             return;
         }
@@ -45,8 +42,8 @@ export default class ScatterPlot extends React.Component {
                 max(data, (d) => d.avg_temp_c) + 1
             ])
             .range([height, 0])
-        
-            const currentDate = new Date();
+
+        const currentDate = new Date();
 
         return (
             <div>
