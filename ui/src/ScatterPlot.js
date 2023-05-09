@@ -1,5 +1,5 @@
 import React from "react"
-import { scaleLinear, max, min, axisLeft, axisBottom, select } from "d3"
+import { timeFormat, scaleLinear, max, min, axisLeft, axisBottom, select } from "d3"
 
 export default class ScatterPlot extends React.Component {
 
@@ -13,9 +13,9 @@ export default class ScatterPlot extends React.Component {
     async componentWillMount() {
         try {
             const response = await fetch('http://localhost:8080/weather');
-            // console.log(response);
+            console.log(response);
             const data = await response.json();
-            // console.log(data);
+            console.log(data);
             this.setState({ data });
         } catch (err) {
             console.error(err);
@@ -45,10 +45,12 @@ export default class ScatterPlot extends React.Component {
                 max(data, (d) => d.avg_temp_c) + 1
             ])
             .range([height, 0])
+        
+            const currentDate = new Date();
 
         return (
             <div>
-                <h3> Scatter Plot with Trend Line </h3>
+                <h3> Average Temperature - {currentDate.toDateString()} </h3>
                 <svg
                     width={width + margin.right + margin.left}
                     height={height + margin.top + margin.bottom}
@@ -61,11 +63,10 @@ export default class ScatterPlot extends React.Component {
                         className="main"
                     >
                         <RenderCircles data={data} scale={{ x, y }} />
-                        <TrendLine data={data} scale={{ x, y }} />
                         <Axis
                             axis="x"
                             transform={"translate(0," + height + ")"}
-                            scale={axisBottom().scale(x)}
+                            scale={axisBottom().scale(x).tickFormat(timeFormat("%H:%M:%S"))}
                         />
                         <Axis
                             axis="y"
@@ -94,36 +95,6 @@ class RenderCircles extends React.Component {
     }
 }
 
-class TrendLine extends React.Component {
-    render() {
-        let x_coords = this.props.data.map(n => {
-            return new Date(n.window.end);
-        })
-        let y_coords = this.props.data.map(n => {
-            return n.avg_temp_c;
-        })
-        const trendline = linearRegression(y_coords, x_coords)
-
-        // Lowest and highest x coordinates to draw a plot line
-        const lowest_x = x_coords.sort((a, b) => a - b)[0]
-        const hightest_x = x_coords.sort((a, b) => a - b)[x_coords.length - 1]
-        const trendline_points = [
-            [lowest_x, trendline(lowest_x)],
-            [hightest_x, trendline(hightest_x)]
-        ]
-
-        return (
-            <line
-                x1={this.props.scale.x(trendline_points[0][0])}
-                y1={this.props.scale.y(trendline_points[0][1])}
-                x2={this.props.scale.x(trendline_points[1][0])}
-                y2={this.props.scale.y(trendline_points[1][1])}
-                style={{ stroke: "black", strokeWidth: "2" }}
-            />
-        )
-    }
-}
-
 class Axis extends React.Component {
     componentDidMount() {
         const node = this.refs[this.props.axis]
@@ -138,35 +109,5 @@ class Axis extends React.Component {
                 ref={this.props.axis}
             />
         )
-    }
-}
-
-function linearRegression(y, x) {
-    var lr = {}
-    var n = y.length
-    var sum_x = 0
-    var sum_y = 0
-    var sum_xy = 0
-    var sum_xx = 0
-    var sum_yy = 0
-
-    for (var i = 0; i < y.length; i++) {
-        sum_x += x[i]
-        sum_y += y[i]
-        sum_xy += x[i] * y[i]
-        sum_xx += x[i] * x[i]
-        sum_yy += y[i] * y[i]
-    }
-
-    lr["slope"] = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x)
-    lr["intercept"] = (sum_y - lr.slope * sum_x) / n
-    lr["r2"] = Math.pow(
-        (n * sum_xy - sum_x * sum_y) /
-        Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y)),
-        2
-    )
-
-    return x => {
-        return lr.slope * x + lr.intercept
     }
 }
