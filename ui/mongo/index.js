@@ -24,7 +24,7 @@ function getLatestWeather() {
   const date = new Date().setHours(new Date().getHours() - 1);
   
   return collection.find({
-    // 'window.end': { $gte: new Date(date) }
+    'window.end': { $gte: new Date(date) }
   }).toArray();
 }
 

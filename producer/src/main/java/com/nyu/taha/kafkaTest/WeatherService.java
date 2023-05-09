@@ -28,7 +28,7 @@ public class WeatherService {
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 10000)
     public void sendWeatherDataToKafka() {
         // Make the API call to weatherapi.com
         ResponseEntity<String> response = restTemplate.exchange(
